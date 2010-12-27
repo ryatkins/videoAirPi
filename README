@@ -1,0 +1,27 @@
+Totem AirPlay Plugin
+--------------------------------------------------------------------------------
+
+A FOSS Python PoC implementation of the server side AirPlay Protocol.
+
+It announces the AirPlay service over avahi to any iOS devices capabable of
+AirPlay and allows a video to be played back in Totem easily.
+
+The playback can also be controlled from the iOS device including play/pause
+aswell as seeking to certain time offsets.
+
+AirPlay photo "playback" is not supported.
+
+Future versions could act as a client themself and allow Totem to stream
+media to iOS capable servers like the Apple TV 2 or other computers running
+Totem with AirPlay support.
+
+Installation
+--------------------------------------------------------------------------------
+
+To install the plugin simply symlink the source directory into your Totem's
+plugin directory.
+
+This can be for instance: ~/.local/share/totem/plugins/airplay/
+
+Then restart Totem and activate the plugin. Obviously Totem must be compiled
+with Python support.
