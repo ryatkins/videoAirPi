@@ -62,9 +62,12 @@ class AirPlayTotemPlayer(AirPlayService):
 				while (int(duration) == 0):
 					duration = float(self.totem.get_property('stream-length') / 1000)
 					time.sleep(1)
-				# we also get a start time from the device, so seek to it
+				# we also get a start time from the device
 				targetoffset = float(duration * float(self.location[1]))
-				self.set_scrub(targetoffset)
+				position = float(self.totem.get_property('current-time') / 1000)
+				# only seek to it if it's above current time, since the video is already playing
+				if (targetoffset > position):
+					self.set_scrub(targetoffset)
 
 			if (not self.totem.is_playing()):
 				self.totem.action_play()
