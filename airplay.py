@@ -57,7 +57,7 @@ class AirPlayTotemPlayer(AirPlayService):
 	# this must seek to a certain time
 	def set_scrub(self, position):
 		if self.totem.is_seekable():
-			gobject.idle_add(self.totem.action_seek_time, int(float(position) * 1000))
+			gobject.idle_add(self.totem.action_seek_time, int(float(position) * 1000), False)
 
 	# this only sets the location and start position, it does not yet start to play
 	def play(self, location, position):
