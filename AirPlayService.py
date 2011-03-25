@@ -208,8 +208,6 @@ class AsyncoreThread(threading.Thread):
 
 class AirPlayService(asyncore.dispatcher):
 	def __init__(self, name=None, host="0.0.0.0", port=22555):
-		print "AirPlayService running"
-
 		# create socket server
 		asyncore.dispatcher.__init__(self)
 		self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -230,6 +228,8 @@ class AirPlayService(asyncore.dispatcher):
 		self.thread = AsyncoreThread(timeout=30)
 		self.thread.is_finished = False
 		self.thread.start()
+
+		print "AirPlayService running"
 
 	def handle_accept(self):
 		pair = self.accept()
