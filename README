@@ -15,6 +15,14 @@ Future versions could act as a client themself and allow Totem to stream
 media to iOS capable servers like the Apple TV 2 or other computers running
 Totem with AirPlay support.
 
+Requirements
+--------------------------------------------------------------------------------
+
+Software:
+	Totem
+	Python with Avahi, GObject and DBUS bindings
+	Working Avahi stack (http://avahi.org)
+
 Installation
 --------------------------------------------------------------------------------
 
