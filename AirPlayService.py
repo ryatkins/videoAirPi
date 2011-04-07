@@ -119,6 +119,8 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 		elif (request.type == 'PUT' and request.uri.find('/photo')>-1):
 			self.photo(request.body, request.headers['X-Apple-Transition'])
 			answer = self.create_request()
+		elif (request.uri.find('/slideshow-features')>-1):
+			answer = self.create_request(404)
 		elif (request.type == 'GET' and request.uri.find('/server-info')>-1):
 			self.server_info()
 			content = '<?xml version="1.0" encoding="UTF-8"?>\
