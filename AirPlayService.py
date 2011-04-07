@@ -25,6 +25,7 @@ import platform
 import socket
 import threading
 import time
+import uuid
 from datetime import datetime, date
 from urlparse import urlparse
 from ZeroconfService import ZeroconfService
@@ -215,11 +216,15 @@ class AirPlayService(asyncore.dispatcher):
 		self.bind((host, port))
 		self.listen(5)
 		self.remote_clients = []
+		macstr = "%012X" % uuid.getnode()
+		self.deviceid = ''.join("%s:" % macstr[i:i+2] for i in range(0, len(macstr), 2))[:-1]
+		self.features = 0x07 # 0x77 on iOS 4.3.1
+		self.model = "AppleTV2,1"
 
 		# create avahi service
 		if (name is None):
 			name = "Airplay Service on " + platform.node()
-		self.zeroconf_service = ZeroconfService(name, port=port, stype="_airplay._tcp", text=["Name="+name])
+		self.zeroconf_service = ZeroconfService(name, port=port, stype="_airplay._tcp", text=["deviceid="+self.deviceid,"features="+hex(self.features),"model="+self.model])
 
 		# publish avahi service
 		self.zeroconf_service.publish()
