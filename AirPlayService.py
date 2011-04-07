@@ -155,6 +155,12 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 	def set_scrub(self, position):
 		return False
 
+	def server_info(self):
+		return False
+
+	def playback_info(self):
+		return False
+
 	def play(self, location, position):
 		return False
 
@@ -163,6 +169,9 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 
 	def reverse(self, info):
 		return True
+
+	def slideshow_features(self):
+		return False
 
 	def photo(self, data, transition):
 		return False
