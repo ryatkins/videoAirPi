@@ -106,7 +106,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 				d, p = self.service.get_scrub()
 				content = "duration: " + str(float(d))
 				content += "\nposition: " + str(float(p))
-				answer = self.create_request(200, content)
+				answer = self.create_request(200, "", content)
 			elif request.type == 'POST':
 				self.service.set_scrub(float(request.params['position']))
 				answer = self.create_request()
@@ -131,7 +131,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 		datestr = today.strftime("%a, %d %b %Y %H:%M:%S")
 		return datestr+" GMT"
 
-	def create_request(self, status = 200, body = ""):
+	def create_request(self, status = 200, header = "", body = ""):
 		clength = len(bytes(body))
 		if (status == 200):
 			answer = "HTTP/1.1 200 OK"
@@ -143,6 +143,8 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 			answer += "\nConnection: Upgrade"
 		answer += "\nDate: " + self.getDateTime()
 		answer += "\nContent-Length: " + str(clength)
+		if (header != ""):
+			answer += "\n" + header
 		answer +="\n\n"
 		answer += body
 		return answer
