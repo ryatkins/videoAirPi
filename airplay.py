@@ -54,6 +54,9 @@ class AirPlayTotemPlayer(AirPlayService):
 		position = float(self.totem.get_property('current-time') / 1000)
 		return duration, position
 
+	def is_playing(self):
+		return self.totem.is_playing()
+
 	# this must seek to a certain time
 	def set_scrub(self, position):
 		if self.totem.is_seekable():

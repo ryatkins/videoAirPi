@@ -94,7 +94,57 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 		answer = ""
 
 		# process the request and run the appropriate callback
-		if (request.uri.find('/play')>-1):
+		if (request.uri.find('/playback-info')>-1):
+			self.playback_info()
+			content = '<?xml version="1.0" encoding="UTF-8"?>\
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\
+<plist version="1.0">\
+<dict>\
+<key>duration</key>\
+<real>%f</real>\
+<key>position</key>\
+<real>%f</real>\
+<key>rate</key>\
+<real>%f</real>\
+<key>playbackBufferEmpty</key>\
+<%s/>\
+<key>playbackBufferFull</key>\
+<false/>\
+<key>playbackLikelyToKeepUp</key>\
+<true/>\
+<key>readyToPlay</key>\
+<%s/>\
+<key>loadedTimeRanges</key>\
+<array>\
+    <dict>\
+        <key>duration</key>\
+        <real>%f</real>\
+        <key>start</key>\
+        <real>0.000000</real>\
+    </dict>\
+</array>\
+<key>seekableTimeRanges</key>\
+<array>\
+    <dict>\
+        <key>duration</key>\
+        <real>%f</real>\
+        <key>start</key>\
+        <real>0.000000</real>\
+    </dict>\
+</array>\
+</dict>\
+</plist>'
+			d, p = self.service.get_scrub()
+			if (d+p == 0):
+				playbackBufferEmpty = 'true'
+				readyToPlay = 'false'
+			else:
+				playbackBufferEmpty = 'false'
+				readyToPlay = 'true'
+
+			content = content % (float(d), float(p), int(self.service.is_playing()), playbackBufferEmpty, readyToPlay, float(d), float(d))
+			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
+		elif (request.uri.find('/play')>-1):
 			parsedbody = request.parse_headers(request.body.splitlines())
 			self.service.play(parsedbody['Content-Location'], float(parsedbody['Start-Position']))
 			answer = self.create_request()
