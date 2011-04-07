@@ -119,6 +119,26 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 		elif (request.type == 'PUT' and request.uri.find('/photo')>-1):
 			self.photo(request.body, request.headers['X-Apple-Transition'])
 			answer = self.create_request()
+		elif (request.type == 'GET' and request.uri.find('/server-info')>-1):
+			self.server_info()
+			content = '<?xml version="1.0" encoding="UTF-8"?>\
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\
+<plist version="1.0">\
+<dict>\
+<key>deviceid</key>\
+<string>%s</string>\
+<key>features</key>\
+<integer>%d</integer>\
+<key>model</key>\
+<string>%s</string>\
+<key>protovers</key>\
+<string>1.0</string>\
+<key>srcvers</key>\
+<string>101.10</string>\
+</dict>\
+</plist>'
+			content = content % (self.service.deviceid, self.service.features, self.service.model)
+			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
 		else:
 			print "ERROR: AirPlay - Unable to handle request \"%s\"" % (request.uri)
 			answer = self.create_request(404)
