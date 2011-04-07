@@ -126,7 +126,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 		if(answer is not ""):
 			self.send(answer)
 
-	def getDateTime(self):
+	def get_datetime(self):
 		today = datetime.now()
 		datestr = today.strftime("%a, %d %b %Y %H:%M:%S")
 		return datestr+" GMT"
@@ -141,7 +141,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 			answer = "HTTP/1.1 101 Switching Protocols"
 			answer += "\nUpgrade: PTTH/1.0"
 			answer += "\nConnection: Upgrade"
-		answer += "\nDate: " + self.getDateTime()
+		answer += "\nDate: " + self.get_datetime()
 		answer += "\nContent-Length: " + str(clength)
 		if (header != ""):
 			answer += "\n" + header
