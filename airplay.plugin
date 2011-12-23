@@ -1,9 +1,9 @@
-[Totem Plugin]
+[Plugin]
 Loader=python
 Module=airplay
 IAge=1
 Builtin=false
-Name=AirPlay Support 1.0.2
+Name=AirPlay Support 1.0.3
 Description=Playback of videos using Apple AirPlay. iOS 4.2.1 or later required.
 Authors=Martin S.
 Copyright=Copyright © 2010-2011 Martin S.

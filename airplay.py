@@ -20,22 +20,29 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import gobject
-import totem
+from gi.repository import GObject
+from gi.repository import Totem
+from gi.repository import Peas
+from gi.repository import Gtk
 import platform
 import time
 from AirPlayService import AirPlayService
 
-class AirPlayPlugin (totem.Plugin):
+class AirPlay (GObject.Object, Peas.Activatable):
+	__gtype_name__ = 'AirPlay'
+
+	object = GObject.property(type = GObject.Object)
+
 	def __init__ (self):
-		totem.Plugin.__init__ (self)
+		GObject.Object.__init__ (self)
 		self.totem = None
 
-	def activate (self, totem_object):
-		self.service = AirPlayTotemPlayer(totem=totem_object,name="Totem on %s" % (platform.node()))
+	def do_activate (self):
+		self.totem = self.object
+		self.totem.service = AirPlayTotemPlayer(totem = self.totem, name = "Totem on %s" % (platform.node()))
 
-	def deactivate (self, totem_object):
-		self.service.__del__()
+	def do_deactivate (self):
+		self.totem.service.__del__()
 
 class AirPlayTotemPlayer(AirPlayService):
 	def __init__(self, totem, name=None, host="0.0.0.0", port=22555):
