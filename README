@@ -20,7 +20,7 @@ Requirements
 
 Software:
 	Totem
-	Python with Avahi, GObject and DBUS bindings
+	Python with Avahi (python-avahi), GObject and DBUS bindings
 	Working Avahi stack (http://avahi.org)
 
 Installation
