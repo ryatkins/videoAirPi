@@ -192,6 +192,8 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 </plist>'
 			content = content % (self.service.deviceid, self.service.features, self.service.model)
 			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
+		elif (request.uri.find("/setProperty")>-1):
+			anert = self.create_request()
 		else:
 			print >> sys.stderr, "ERROR: AirPlay - Unable to handle request \"%s\"" % (request.uri)
 			answer = self.create_request(404)
