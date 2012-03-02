@@ -20,6 +20,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+import sys
 import asyncore
 import platform
 import socket
@@ -192,7 +193,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 			content = content % (self.service.deviceid, self.service.features, self.service.model)
 			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
 		else:
-			print "ERROR: AirPlay - Unable to handle request \"%s\"" % (request.uri)
+			print >> sys.stderr, "ERROR: AirPlay - Unable to handle request \"%s\"" % (request.uri)
 			answer = self.create_request(404)
 
 		if(answer is not ""):
