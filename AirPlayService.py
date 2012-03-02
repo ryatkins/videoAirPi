@@ -56,7 +56,7 @@ class BaseAirPlayRequest(object):
 		if (self.uri.find('?')):
 			url = urlparse(self.uri)
 			if (url[4] is not ""):
-				self.params = dict([part.split('=') for part in url[4].split('&')])
+				self.params = dict([part.split('=') for part in url[4].split('&') if part.count('=') > 0])
 				self.uri = url[2]
 
 		# parse message body

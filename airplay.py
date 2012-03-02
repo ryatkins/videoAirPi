@@ -23,7 +23,6 @@
 from gi.repository import GObject
 from gi.repository import Totem
 from gi.repository import Peas
-from gi.repository import Gtk
 import platform
 import time
 from AirPlayService import AirPlayService
@@ -39,7 +38,7 @@ class AirPlay (GObject.Object, Peas.Activatable):
 
 	def do_activate (self):
 		self.totem = self.object
-		self.totem.service = AirPlayTotemPlayer(totem = self.totem, name = "Totem on %s" % (platform.node()))
+		self.totem.service = AirPlayTotemPlayer(totem=self.totem,name="Totem on %s" % (platform.node()))
 
 	def do_deactivate (self):
 		self.totem.service.__del__()
@@ -67,7 +66,7 @@ class AirPlayTotemPlayer(AirPlayService):
 	# this must seek to a certain time
 	def set_scrub(self, position):
 		if self.totem.is_seekable():
-			gobject.idle_add(self.totem.action_seek_time, int(float(position) * 1000), False)
+			GObject.idle_add(self.totem.action_seek_time, int(float(position) * 1000), False)
 
 	# this only sets the location and start position, it does not yet start to play
 	def play(self, location, position):
@@ -76,7 +75,7 @@ class AirPlayTotemPlayer(AirPlayService):
 
 	# stop the playback completely
 	def stop(self, info):
-		gobject.idle_add(self.totem.action_stop)
+		GObject.idle_add(self.totem.action_stop)
 
 	# reverse HTTP to PTTH
 	def reverse(self, info):
@@ -88,7 +87,7 @@ class AirPlayTotemPlayer(AirPlayService):
 			if self.location is not None:
 				timeout = 5
 				# start playback and loading of media
-				gobject.idle_add(self.totem.add_to_playlist_and_play, self.location[0], "AirPlay Video", False)
+				GObject.idle_add(self.totem.add_to_playlist_and_play, self.location[0], "AirPlay Video", False)
 				# wait until stream-length is loaded and is not zero
 				duration = 0
 				while (int(duration) == 0 and timeout > 0):
@@ -103,10 +102,10 @@ class AirPlayTotemPlayer(AirPlayService):
 					self.set_scrub(targetoffset)
 
 			if (not self.totem.is_playing()):
-				gobject.idle_add(self.totem.action_play)
+				GObject.idle_add(self.totem.action_play)
 
 			del self.location
 			self.location = None
 		else:
-			gobject.idle_add(self.totem.action_pause)
+			GObject.idle_add(self.totem.action_play_pause)
 
