@@ -20,6 +20,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+import sys
 import asyncore
 import platform
 import socket
@@ -56,7 +57,7 @@ class BaseAirPlayRequest(object):
 		if (self.uri.find('?')):
 			url = urlparse(self.uri)
 			if (url[4] is not ""):
-				self.params = dict([part.split('=') for part in url[4].split('&')])
+				self.params = dict([part.split('=') for part in url[4].split('&') if part.count('=') > 0])
 				self.uri = url[2]
 
 		# parse message body
@@ -191,8 +192,10 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 </plist>'
 			content = content % (self.service.deviceid, self.service.features, self.service.model)
 			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
+		elif (request.uri.find("/setProperty")>-1):
+			anert = self.create_request()
 		else:
-			print "ERROR: AirPlay - Unable to handle request \"%s\"" % (request.uri)
+			print >> sys.stderr, "ERROR: AirPlay - Unable to handle request \"%s\"" % (request.uri)
 			answer = self.create_request(404)
 
 		if(answer is not ""):
