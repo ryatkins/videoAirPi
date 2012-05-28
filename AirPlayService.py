@@ -27,8 +27,10 @@ import socket
 import threading
 import time
 import uuid
+import re
 from datetime import datetime, date
 from urlparse import urlparse
+from biplist import readPlistFromString
 from ZeroconfService import ZeroconfService
 
 __all__ = ["BaseAirPlayRequest", "AirPlayService", "AirPlayProtocolHandler"]
@@ -75,10 +77,22 @@ class BaseAirPlayRequest(object):
 
 	def parse_headers(self, lines):
 		headers = {}
+		plist = []
 		for line in lines:
-			if line:
-				name, value = line.split(": ", 1)
-				headers[name.strip()] = value.strip()
+			match = re.search(r'bplist|\x00', line)
+			if match:
+				plist.append(line)
+			else:
+				if line:
+					name, value = line.split(": ", 1)
+					headers[name.strip()] = value.strip()
+		if len(plist):
+			try:
+				values = readPlistFromString('\r'.join(plist))
+				for key in values:
+					headers[key] = values[key]
+			except (Exception), e:
+				print "Not a plist:", e
 		return headers
 
 class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
