@@ -289,6 +289,7 @@ class AsyncoreThread(threading.Thread):
 		self.loop()
 
 	def loop(self):
+
 		if self.map is None:
 			self.map = asyncore.socket_map
 
@@ -334,8 +335,6 @@ class AirPlayService(asyncore.dispatcher):
 		self.thread.is_finished = False
 		self.thread.start()
 
-		print "AirPlayService running"
-
 	def handle_accept(self):
 		pair = self.accept()
 		if pair is None:
@@ -343,6 +342,7 @@ class AirPlayService(asyncore.dispatcher):
 		else:
 			sock, addr = pair
 			self.remote_clients.append(AirPlayProtocolHandler(sock, self))
+
 
 	def handle_close(self):
 		self.close()
