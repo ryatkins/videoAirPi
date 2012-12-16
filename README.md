@@ -35,7 +35,7 @@ Audio over 3.5 jack:
 
 Video keeps playing after I hit CTRL+c, use this kill command:
 
-kill $(ps aux | grep '[/]usr/bin/omxplayer.bin' | awk '{print $2}')
+	kill $(ps aux | grep '[/]usr/bin/omxplayer.bin' | awk '{print $2}')
 
 ##Contributors
 Code largely borrowed from Totem AirPlay Plugin: https://github.com/dveeden/totem-plugin-airplay
