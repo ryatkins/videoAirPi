@@ -40,5 +40,5 @@ Video keeps playing after I hit CTRL+c, use this kill command:
 ##Contributors
 Code largely borrowed from Totem AirPlay Plugin: https://github.com/dveeden/totem-plugin-airplay
 
-OMXplayer interface from: https://raw.github.com/megawubs/pyplex
+OMXplayer interface from: https://github.com/megawubs/pyplex && https://github.com/jbaiter/pyomxplayer.git
 
