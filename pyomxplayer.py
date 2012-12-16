@@ -8,7 +8,7 @@ from time import sleep
 
 class OMXPlayer(object):
 
-    _FILEPROP_REXP = re.compile(r".*audio streams (\d+) video streams (\d+) chapters (\d+) subtitles (\d+).*")
+    _FILEPROP_REXP = re.compile(r".*audio streams (\d+) video streams (\d+) chapters (\d+) subtitles (\d+) length (\d+).*")
     _VIDEOPROP_REXP = re.compile(r".*Video codec ([\w-]+) width (\d+) height (\d+) profile (\d+) fps ([\d.]+).*")
     _AUDIOPROP_REXP = re.compile(r"Audio codec (\w+) channels (\d+) samplerate (\d+) bitspersample (\d+).*")
     _STATUS_REXP = re.compile(r"V :\s*([\d.]+).*")
@@ -42,7 +42,7 @@ class OMXPlayer(object):
         self.video['dimensions'] = (0,0)
         self.video['profile'] = 0
         self.video['fps'] = 0
-        self.video['streams'] = 0
+        self.video['streams'] = 0        
         self.audio['decoder'] = "unknown"
         self.audio['channels'] = 0
         self.audio['rate'] = 0
@@ -50,11 +50,13 @@ class OMXPlayer(object):
         self.audio['streams'] = 0
         self.chapters = 0
         self.subtitles = 0
+        self.length = 0
         prop_matches = 0
         self.finished = False
 
         for i in range (0, 6):
             line = self._process.readline()
+            print line
             file_props_match = self._FILEPROP_REXP.match(line)
             video_props_match = self._VIDEOPROP_REXP.match(line)
             audio_props_match = self._AUDIOPROP_REXP.match(line)
@@ -63,7 +65,7 @@ class OMXPlayer(object):
                 # Get file properties
                 file_props = file_props_match.groups()
                 (self.audio['streams'], self.video['streams'],
-                 self.chapters, self.subtitles) = [int(x) for x in file_props]
+                 self.chapters, self.subtitles, self.length) = [int(x) for x in file_props]
                 prop_matches += 1
             if(video_props_match):
                 # Get video properties

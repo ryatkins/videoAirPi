@@ -23,14 +23,12 @@
 #from gi.repository import GObject
 #from gi.repository import Totem
 #from gi.repository import Peas
-import platform, sys
+import platform, sys, signal
 import time
 from AirPlayService import AirPlayService
 from pyomxplayer import OMXPlayer
 
 class AirPlay:
-#	__gtype_name__ = 'AirPlay'
-#	object = GObject.property(type = GObject.Object)
 
 	playing = False
 	seekable = False
@@ -39,43 +37,49 @@ class AirPlay:
 	add_to_playlist_and_play = ""
 	action_stop = False
 	action_seek_time = 0
-	omxArgs = None
+	omxArgs = ''
 
 	def __init__ (self):
-
-
 		args = len(sys.argv)
 		if args > 1:
-			if sys.argv[1] == "hdmi":
-				self.omxArgs = '-o hdmi'
-				print "Audio output over HDMI"
-			else:
+			if sys.argv[1] == "jack":
 				self.omxArgs = ''
 				print "Audio output over 3,5mm jack"
+		else:
+			self.omxArgs = '-o hdmi'
+			print "Audio output over HDMI"
+
 
 		self.totem = None
 		self.totem = self
 		self.omx = None
 
-		self.totem.service = AirPlayTotemPlayer(totem=self.totem,name="Roman on %s" % (platform.node()), host="192.168.2.114", port=8000)
+		self.totem.service = AirPlayTotemPlayer(totem=self.totem,name="AirPi on %s" % (platform.node()), host="192.168.2.114", port=8000)
 
-	def PlayMedia(self, fullpath): #, tag, unknown1, unknown2, unknown3):
+	def signal_handler(self, signal, frame):
+		print '\nQuiting - please wait....'
+		self.Stop()
+		self.totem.service.exit()
+		sys.exit(0)
+
+	def PlayMedia(self, fullpath, startPosition): #, tag, unknown1, unknown2, unknown3):
 		global parsed_path
 		global media_key
 		global duration
 		
-	#	parsed_path = urlparse(fullpath)
-	#	media_path = parsed_path.scheme + "://" + parsed_path.netloc + tag
+		#print startPosition
+#		print 'Args'
+#		print self.omxArgs
 		
-	#	self.media = self.plex.getMedia(media_path)
+		if (startPosition != 0):
+			self.omxArgs += " -f " + str(startPosition)
+#			print self.omxArgs
 		
-        #print 'mediapath', mediapath                                                                                                       
 		if(self.omx):
 			self.Stop()
-		#transcodeURL = self.media.getTranscodeURL()
 		print fullpath
 		self.omx = OMXPlayer(fullpath, args=self.omxArgs, start_playback=True)
-
+	
 	def Pause(self, message):
 		if(self.omx):
 			self.omx.set_speed(1)
@@ -129,8 +133,9 @@ class AirPlayTotemPlayer(AirPlayService):
 	# this returns current media duration and current seek time
 	def get_scrub(self):
 		# return self.totem.stream-length, self.totem.current-time
-		duration = float(self.totem.get_property('stream-length') / 1000)
-		position = float(self.totem.get_property('current-time') / 1000)
+		duration = self.totem.omx.length
+		position = self.totem.omx._get_position()
+		print position
 		return duration, position
 
 	def is_playing(self):
@@ -140,7 +145,6 @@ class AirPlayTotemPlayer(AirPlayService):
 	def set_scrub(self, position):
 		if self.totem.is_seekable():
 			print 'seekable code'
-#			GObject.idle_add(self.totem.action_seek_time, int(float(position) * 1000), False)
 
 	# this only sets the location and start position, it does not yet start to play
 	def play(self, location, position):
@@ -150,7 +154,7 @@ class AirPlayTotemPlayer(AirPlayService):
 	# stop the playback completely
 	def stop(self, info):
 		print 'stop code'
-#		GObject.idle_add(self.totem.action_stop)
+		self.totem.omx.stop()
 
 	# reverse HTTP to PTTH
 	def reverse(self, info):
@@ -163,7 +167,7 @@ class AirPlayTotemPlayer(AirPlayService):
 				timeout = 5
 				# start playback and loading of media
 
-#				GObject.idle_add(self.totem.add_to_playlist_and_play, self.location[0], "AirPlay Video", False)
+
 				# wait until stream-length is loaded and is not zero
 				duration = 0
 				#while (int(duration) == 0 and timeout > 0):
@@ -172,7 +176,7 @@ class AirPlayTotemPlayer(AirPlayService):
 				#	timeout -= 1
 				# we also get a start time from the device
 				targetoffset = float(duration * float(self.location[1]))
-				position = float(self.totem.get_property('current-time') / 1000)
+				position = self.totem.omx._get_position()
 				# only seek to it if it's above current time, since the video is already playing
 				if (targetoffset > position):
 					self.set_scrub(targetoffset)
@@ -180,14 +184,19 @@ class AirPlayTotemPlayer(AirPlayService):
 			if (not self.totem.is_playing()):
 				print 'play code'
 				print self.location[1]
-				self.totem.PlayMedia(self.location[0])
-#				GObject.idle_add(self.totem.action_play)
+				self.totem.PlayMedia(self.location[0], self.location[1])
+
 
 			del self.location
 			self.location = None
 		else:
 			print 'play_pause'
-#			GObject.idle_add(self.totem.action_play_pause)
+			self.totem.omx.toggle_pause()
+
 
 
 myAirplay = AirPlay()
+
+signal.signal(signal.SIGINT, myAirplay.signal_handler)
+signal.pause()
+

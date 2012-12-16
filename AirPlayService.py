@@ -43,11 +43,13 @@ class BaseAirPlayRequest(object):
 
 		# we split the message into HTTP headers and content body
 		message = data.split("\r\n\r\n", 1)
+		#print message
 		headers = message[0]
 		headerlines = headers.splitlines()
 
 		# parse request headers
 		command = headerlines[0].split()
+		print command
 		self.type = command[0]
 		self.uri = command[1]
 		self.version = command[2]
@@ -56,10 +58,12 @@ class BaseAirPlayRequest(object):
 
 		# parse any uri query parameters
 		self.params = None
+		#print self.uri
 		if (self.uri.find('?')):
 			url = urlparse(self.uri)
 			if (url[4] is not ""):
 				self.params = dict([part.split('=') for part in url[4].split('&') if part.count('=') > 0])
+				#print self.params
 				self.uri = url[2]
 
 		# parse message body
@@ -99,7 +103,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 	def __init__(self, socket, service):
 		asyncore.dispatcher_with_send.__init__(self, socket)
 		self.service = service
-
+		
 	def handle_read(self):
 		# read from the socket and parse a HTTP request
 		request = BaseAirPlayRequest()
@@ -157,10 +161,18 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 				playbackBufferEmpty = 'false'
 				readyToPlay = 'true'
 
+#			print float(request.params['position'])
+			
+
 			content = content % (float(d), float(p), int(self.service.is_playing()), playbackBufferEmpty, readyToPlay, float(d), float(d))
 			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
 		elif (request.uri.find('/play')>-1):
 			parsedbody = request.parse_headers(request.body.splitlines())
+			#print parsedbody
+			
+			#self.send(self.create_request(200, "/scrub"))
+			
+			
 			self.service.play(parsedbody['Content-Location'], float(parsedbody['Start-Position']))
 			answer = self.create_request()
 		elif (request.uri.find('/stop')>-1):
@@ -171,9 +183,12 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 				d, p = self.service.get_scrub()
 				content = "duration: " + str(float(d))
 				content += "\nposition: " + str(float(p))
+				#print 'position'
+				#print float(request.params['position'])
 				answer = self.create_request(200, "", content)
 			elif request.type == 'POST':
 				self.service.set_scrub(float(request.params['position']))
+				#print float(request.params['position'])
 				answer = self.create_request()
 		elif (request.uri.find('/reverse')>-1):
 			self.service.reverse(request.headers)
@@ -207,13 +222,14 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 			content = content % (self.service.deviceid, self.service.features, self.service.model)
 			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
 		elif (request.uri.find("/setProperty")>-1):
-			anert = self.create_request()
+			answer = self.create_request()
 		else:
 			print >> sys.stderr, "ERROR: AirPlay - Unable to handle request \"%s\"" % (request.uri)
 			answer = self.create_request(404)
 
 		if(answer is not ""):
 			self.send(answer)
+			
 
 	def get_datetime(self):
 		today = datetime.now()
@@ -251,6 +267,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 		return False
 
 	def play(self, location, position):
+		print 'play returning false'
 		return False
 
 	def stop(self, info):
@@ -280,7 +297,7 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 class AsyncoreThread(threading.Thread):
 	def __init__(self, timeout=30.0, use_poll=0,map=None):
 		self.flag = True
-		self.timeout = 30.0
+		self.timeout = 1.0
 		self.use_poll = use_poll
 		self.map = map
 		threading.Thread.__init__(self, None, None, 'asyncore thread')
@@ -343,10 +360,14 @@ class AirPlayService(asyncore.dispatcher):
 			sock, addr = pair
 			self.remote_clients.append(AirPlayProtocolHandler(sock, self))
 
-
 	def handle_close(self):
 		self.close()
-
+		
+	def exit(self):
+		self.thread.end()
+		self.close()
+		self.zeroconf_service.unpublish()
+	
 	def __del__(self):
 		self.thread.end()
 		self.close()
