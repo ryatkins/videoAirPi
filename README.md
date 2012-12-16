@@ -12,6 +12,7 @@ sudo pip install pexpect
 sudo apt-get install python-avahi
 sudo apt-get install git
 
+
 ##Install
 cd ~  [to your home directory or wherever you want this installed]
 git clone https://github.com/ryatkins/videoAirPi.git
