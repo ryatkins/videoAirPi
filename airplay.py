@@ -52,7 +52,7 @@ class AirPlay:
 		self.videoAirPlay = self
 		self.omx = None
 
-		self.videoAirPlay.service = VideoAirPlayPlayer(videoAirPlay=self.videoAirPlay,name="AirPi on %s" % (platform.node()), host=self.get_ip_address('eth0'), port=8000)
+		self.videoAirPlay.service = VideoAirPlayPlayer(videoAirPlay=self.videoAirPlay,name="VideoAirPi on %s" % (platform.node()), host=self.get_ip_address('eth0'), port=8000)
 
 	def signal_handler(self, signal, frame):
 		print '\nQuiting - please wait....'
@@ -76,9 +76,10 @@ class AirPlay:
 		#print startPosition
 #		print 'Args'
 #		print self.omxArgs
-		
-		if (startPosition != 0):
-			self.omxArgs += " -f " + str(startPosition)
+
+		# not supported in HLS video stream		
+#		if (startPosition != 0):
+#			self.omxArgs += " -f " + str(startPosition)
 #			print self.omxArgs
 		
 		if(self.omx):
