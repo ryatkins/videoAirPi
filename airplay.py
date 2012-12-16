@@ -20,10 +20,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-#from gi.repository import GObject
-#from gi.repository import Totem
-#from gi.repository import Peas
 import platform, sys, signal
+import socket, fcntl, struct
 import time
 from AirPlayService import AirPlayService
 from pyomxplayer import OMXPlayer
@@ -54,13 +52,21 @@ class AirPlay:
 		self.totem = self
 		self.omx = None
 
-		self.totem.service = AirPlayTotemPlayer(totem=self.totem,name="AirPi on %s" % (platform.node()), host="192.168.2.114", port=8000)
+		self.totem.service = VideoAirPlayPlayer(totem=self.totem,name="AirPi on %s" % (platform.node()), host=self.get_ip_address('eth0'), port=8000)
 
 	def signal_handler(self, signal, frame):
 		print '\nQuiting - please wait....'
 		self.Stop()
 		self.totem.service.exit()
 		sys.exit(0)
+		
+	def get_ip_address(self,ifname):
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		return socket.inet_ntoa(fcntl.ioctl(
+			s.fileno(),
+			0x8915,  # SIOCGIFADDR
+			struct.pack('256s', ifname[:15])
+		)[20:24])
 
 	def PlayMedia(self, fullpath, startPosition): #, tag, unknown1, unknown2, unknown3):
 		global parsed_path
@@ -117,14 +123,12 @@ class AirPlay:
 	def is_seekable (self):
 		return self.seekable
 
-
-
-
-class AirPlayTotemPlayer(AirPlayService):
+class VideoAirPlayPlayer(AirPlayService):
 	def __init__(self, totem, name=None, host="0.0.0.0", port=22555):
 		self.location = None
 		self.totem = totem
 		AirPlayService.__init__(self, name, host, port)
+		print "Video AirPlay service started on " + host + ":" + str(port)
 
 	def __del__(self):
 		self.totem.action_stop()
@@ -176,10 +180,10 @@ class AirPlayTotemPlayer(AirPlayService):
 				#	timeout -= 1
 				# we also get a start time from the device
 				targetoffset = float(duration * float(self.location[1]))
-				position = self.totem.omx._get_position()
+				#position = self.totem.omx._get_position()
 				# only seek to it if it's above current time, since the video is already playing
-				if (targetoffset > position):
-					self.set_scrub(targetoffset)
+				#if (targetoffset > position):
+					#self.set_scrub(targetoffset)
 
 			if (not self.totem.is_playing()):
 				print 'play code'

@@ -49,7 +49,7 @@ class BaseAirPlayRequest(object):
 
 		# parse request headers
 		command = headerlines[0].split()
-		print command
+		#print command
 		self.type = command[0]
 		self.uri = command[1]
 		self.version = command[2]
@@ -58,7 +58,7 @@ class BaseAirPlayRequest(object):
 
 		# parse any uri query parameters
 		self.params = None
-		#print self.uri
+		print self.uri
 		if (self.uri.find('?')):
 			url = urlparse(self.uri)
 			if (url[4] is not ""):
@@ -161,17 +161,11 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 				playbackBufferEmpty = 'false'
 				readyToPlay = 'true'
 
-#			print float(request.params['position'])
-			
-
 			content = content % (float(d), float(p), int(self.service.is_playing()), playbackBufferEmpty, readyToPlay, float(d), float(d))
 			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)
 		elif (request.uri.find('/play')>-1):
 			parsedbody = request.parse_headers(request.body.splitlines())
 			#print parsedbody
-			
-			#self.send(self.create_request(200, "/scrub"))
-			
 			
 			self.service.play(parsedbody['Content-Location'], float(parsedbody['Start-Position']))
 			answer = self.create_request()
@@ -184,11 +178,9 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 				content = "duration: " + str(float(d))
 				content += "\nposition: " + str(float(p))
 				#print 'position'
-				#print float(request.params['position'])
 				answer = self.create_request(200, "", content)
 			elif request.type == 'POST':
 				self.service.set_scrub(float(request.params['position']))
-				#print float(request.params['position'])
 				answer = self.create_request()
 		elif (request.uri.find('/reverse')>-1):
 			self.service.reverse(request.headers)
