@@ -58,7 +58,7 @@ class BaseAirPlayRequest(object):
 
 		# parse any uri query parameters
 		self.params = None
-		print self.uri
+		#print self.uri
 		if (self.uri.find('?')):
 			url = urlparse(self.uri)
 			if (url[4] is not ""):
@@ -154,12 +154,13 @@ class AirPlayProtocolHandler(asyncore.dispatcher_with_send):
 </dict>\
 </plist>'
 			d, p = self.service.get_scrub()
-			if (d+p == 0):
-				playbackBufferEmpty = 'true'
-				readyToPlay = 'false'
-			else:
-				playbackBufferEmpty = 'false'
-				readyToPlay = 'true'
+			if (d is not None and p is not None):
+				if (d+p == 0):
+					playbackBufferEmpty = 'true'
+					readyToPlay = 'false'
+				else:
+					playbackBufferEmpty = 'false'
+					readyToPlay = 'true'
 
 			content = content % (float(d), float(p), int(self.service.is_playing()), playbackBufferEmpty, readyToPlay, float(d), float(d))
 			answer = self.create_request(200, "Content-Type: text/x-apple-plist+xml", content)

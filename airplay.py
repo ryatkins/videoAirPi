@@ -48,16 +48,16 @@ class AirPlay:
 			print "Audio output over HDMI"
 
 
-		self.totem = None
-		self.totem = self
+		self.videoAirPlay = None
+		self.videoAirPlay = self
 		self.omx = None
 
-		self.totem.service = VideoAirPlayPlayer(totem=self.totem,name="AirPi on %s" % (platform.node()), host=self.get_ip_address('eth0'), port=8000)
+		self.videoAirPlay.service = VideoAirPlayPlayer(videoAirPlay=self.videoAirPlay,name="AirPi on %s" % (platform.node()), host=self.get_ip_address('eth0'), port=8000)
 
 	def signal_handler(self, signal, frame):
 		print '\nQuiting - please wait....'
 		self.Stop()
-		self.totem.service.exit()
+		self.videoAirPlay.service.exit()
 		sys.exit(0)
 		
 	def get_ip_address(self,ifname):
@@ -106,7 +106,7 @@ class AirPlay:
 		pass
 
 	def do_deactivate (self):
-		self.totem.service.__del__()
+		self.videoAirPlay.service.__del__()
 
 	def is_playing (self):
 		return self.playing
@@ -124,30 +124,30 @@ class AirPlay:
 		return self.seekable
 
 class VideoAirPlayPlayer(AirPlayService):
-	def __init__(self, totem, name=None, host="0.0.0.0", port=22555):
+	def __init__(self, videoAirPlay, name=None, host="0.0.0.0", port=22555):
 		self.location = None
-		self.totem = totem
+		self.videoAirPlay = videoAirPlay
 		AirPlayService.__init__(self, name, host, port)
 		print "Video AirPlay service started on " + host + ":" + str(port)
 
 	def __del__(self):
-		self.totem.action_stop()
+		self.videoAirPlay.action_stop()
 		AirPlayService.__del__(self)
 
 	# this returns current media duration and current seek time
 	def get_scrub(self):
-		# return self.totem.stream-length, self.totem.current-time
-		duration = self.totem.omx.length
-		position = self.totem.omx._get_position()
-		print position
+		# return self.videoAirPlay.stream-length, self.videoAirPlay.current-time
+		duration = self.videoAirPlay.omx.length
+		position = self.videoAirPlay.omx._get_position()
+		#print position
 		return duration, position
 
 	def is_playing(self):
-		return self.totem.is_playing()
+		return self.videoAirPlay.is_playing()
 
 	# this must seek to a certain time
 	def set_scrub(self, position):
-		if self.totem.is_seekable():
+		if self.videoAirPlay.is_seekable():
 			print 'seekable code'
 
 	# this only sets the location and start position, it does not yet start to play
@@ -158,7 +158,7 @@ class VideoAirPlayPlayer(AirPlayService):
 	# stop the playback completely
 	def stop(self, info):
 		print 'stop code'
-		self.totem.omx.stop()
+		self.videoAirPlay.omx.stop()
 
 	# reverse HTTP to PTTH
 	def reverse(self, info):
@@ -176,26 +176,26 @@ class VideoAirPlayPlayer(AirPlayService):
 				duration = 0
 				#while (int(duration) == 0 and timeout > 0):
 				#	time.sleep(1)
-				#	duration = float(self.totem.get_property('stream-length') / 1000)
+				#	duration = float(self.videoAirPlay.get_property('stream-length') / 1000)
 				#	timeout -= 1
 				# we also get a start time from the device
 				targetoffset = float(duration * float(self.location[1]))
-				#position = self.totem.omx._get_position()
+				#position = self.videoAirPlay.omx._get_position()
 				# only seek to it if it's above current time, since the video is already playing
 				#if (targetoffset > position):
 					#self.set_scrub(targetoffset)
 
-			if (not self.totem.is_playing()):
-				print 'play code'
-				print self.location[1]
-				self.totem.PlayMedia(self.location[0], self.location[1])
+			if (not self.videoAirPlay.is_playing()):
+				print 'Play'
+				#print self.location[1]  # start position
+				self.videoAirPlay.PlayMedia(self.location[0], self.location[1])
 
 
 			del self.location
 			self.location = None
 		else:
 			print 'play_pause'
-			self.totem.omx.toggle_pause()
+			self.videoAirPlay.omx.toggle_pause()
 
 
 
